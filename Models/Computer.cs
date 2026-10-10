@@ -8,13 +8,16 @@
 
 namespace DeviceManagement.Models;
 
+using DeviceManagement.Interfaces;
+
 /// <summary>
-/// Lớp đại diện cho máy tính trong phòng thực hành (chưa thực thi INetworkable ở bước này).
+/// Lớp đại diện cho máy tính trong phòng thực hành (thực thi INetworkable).
 /// </summary>
-public class Computer : Device
+public class Computer : Device, INetworkable
 {
     private int _ramGb;
     private string _processor = string.Empty;
+    private readonly NetworkConnection _connection = new();
 
     /// <summary>
     /// Dung lượng RAM (GB), phải lớn hơn 0.
@@ -48,6 +51,30 @@ public class Computer : Device
     /// Cho biết máy tính có card đồ họa rời (GPU) hay không.
     /// </summary>
     public bool HasDedicatedGpu { get; set; }
+
+    #region INetworkable Implementation (ủy quyền cho NetworkConnection)
+
+    /// <summary>
+    /// Địa chỉ IP hiện tại của máy tính.
+    /// </summary>
+    public string IpAddress => _connection.IpAddress;
+
+    /// <summary>
+    /// Trạng thái kết nối mạng của máy tính.
+    /// </summary>
+    public bool IsConnected => _connection.IsConnected;
+
+    /// <summary>
+    /// Kết nối máy tính vào mạng với IP chỉ định.
+    /// </summary>
+    public void Connect(string ipAddress) => _connection.Connect(ipAddress);
+
+    /// <summary>
+    /// Ngắt kết nối mạng của máy tính.
+    /// </summary>
+    public void Disconnect() => _connection.Disconnect();
+
+    #endregion
 
     /// <summary>
     /// Khởi tạo một đối tượng máy tính mới.
@@ -88,6 +115,7 @@ public class Computer : Device
 
     public override string ToString()
     {
-        return $"{base.ToString()} | CPU: {Processor} | RAM: {RamGb}GB | GPU rời: {(HasDedicatedGpu ? "Có" : "Không")}";
+        string networkInfo = IsConnected ? $"Đã kết nối ({IpAddress})" : "Chưa kết nối";
+        return $"{base.ToString()} | CPU: {Processor} | RAM: {RamGb}GB | GPU rời: {(HasDedicatedGpu ? "Có" : "Không")} | Mạng: {networkInfo}";
     }
 }
